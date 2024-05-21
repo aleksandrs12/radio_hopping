@@ -10,14 +10,14 @@ int lastValue = 0;
 int totalDataLost;
 int dataLost = 0;
 
-const int excluded = 5;
-int excludedChannels[excluded] = {35, 36, 37, 38, 39};
-const int channelCap = 40;
-int channelAr[channelCap-excluded];
-int channelArTemplate[channelCap-excluded];
-int seed = 496219323000;
+const int channelCap = 30;
+int channelAr[channelCap];
+int channelArTemplate[channelCap];
+int seed = 30001;
 unsigned int arraysShuffled = 0;
 unsigned int channelID = 0;
+unsigned int channel = 0;
+
 
 
 void shuffle_array(int *array, int size, int random_number, int *arrayT) {
@@ -53,17 +53,9 @@ void shuffle_array(int *array, int size, int random_number, int *arrayT) {
 void setup() {
   pinMode(3, OUTPUT);
   pinMode(2, OUTPUT);
-  int a = 0;
-  int id = 0;
   for (int i = 0; i < channelCap; i++){
-    if (i != excludedChannels[a]){
-      channelAr[id] = i;
-      channelArTemplate[id] = i;
-      id++;
-    }
-    else{
-      a++;
-    }
+    channelAr[i] = i;
+    channelArTemplate[i] = i;
   }
   Serial.begin(9600);
   radio.begin();
@@ -79,29 +71,39 @@ long t = micros();
 void loop() {
   
   if (radio.available()) {
-    //Serial.println(micros()-t);
-    //t = micros();
+    //Serial.println(micros()-t); //500 default
+    
     radio.read(&data, sizeof(data));
     if (data[3] != 0){
 
       channelID = data[0];
+      /*
       if (channelID -lastValue != 1 && channelID != 0){
         dataLost++;
       }
+      */
+      
       lastValue = channelID;
-      if (data[1] != arraysShuffled){
+      if (data[1] != arraysShuffled && micros()-t > 10000){
+        if (data[1] == 10000){
+          Serial.println(micros()-t);
+        }
         arraysShuffled = data[1];
-        shuffle_array(channelAr, channelCap-excluded, seed - arraysShuffled, channelArTemplate);
+        shuffle_array(channelAr, channelCap, seed - arraysShuffled, channelArTemplate);
+      }
+      t = micros();
+      if (arraysShuffled == 10000){
+        dataLost++;
       }
       channelID++;
-      if (channelID >= channelCap-excluded){
+      if (channelID >= channelCap){
         channelID = 0;
         arraysShuffled++;
-        shuffle_array(channelAr, channelCap-excluded, seed - arraysShuffled, channelArTemplate);
+        shuffle_array(channelAr, channelCap, seed - arraysShuffled, channelArTemplate);
       }
       radio.setChannel(channelAr[channelID]);
 
-
+      
     }
   }
   if (data[4] == 0 || data[4] == 1){
@@ -110,6 +112,18 @@ void loop() {
   if (data[5] == 0 || data[5] == 1){
     digitalWrite(3, data[5]);
   }
+  /*
+  if (micros()-t > 900){
+    t = 0;
+    channelID++;
+      if (channelID >= channelCap){
+        channelID = 0;
+        arraysShuffled++;
+        shuffle_array(channelAr, channelCap, seed - arraysShuffled, channelArTemplate);
+      }
+      radio.setChannel(channelAr[channelID]);
+  }
+  */
 
   //Serial.println(channelAr[channelID]);
 }
