@@ -17,6 +17,7 @@ int seed = 30001;
 unsigned int arraysShuffled = 0;
 unsigned int channelID = 0;
 unsigned int channel = 0;
+int firstInt = 20009;
 
 
 
@@ -74,9 +75,8 @@ void loop() {
     //Serial.println(micros()-t); //500 default
     
     radio.read(&data, sizeof(data));
-    if (data[3] != 0){
+    if (data[0] == firstInt){
 
-      channelID = data[0];
       /*
       if (channelID -lastValue != 1 && channelID != 0){
         dataLost++;

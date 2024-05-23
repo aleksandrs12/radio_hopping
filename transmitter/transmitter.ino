@@ -13,6 +13,7 @@ int channelArTemplate[channelCap];
 int seed = 30001;
 unsigned int arraysShuffled = 0;
 unsigned int channelID = 0;
+int firstInt = 20009;
 
 
 void shuffle_array(int *array, int size, int random_number, int *arrayT) {
@@ -78,7 +79,7 @@ void loop() {
     
   }
 
-  data[0] = channelID;
+  data[0] = firstInt;
   data[1] = arraysShuffled;
   data[2] = channelAr[channelID];
 
