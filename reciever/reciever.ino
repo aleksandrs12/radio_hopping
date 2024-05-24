@@ -5,7 +5,7 @@
 RF24 radio(9, 8); // CE, CSN
 
 const byte address[6] = "00001";
-int data[64];
+uint8_t data[64];
 int lastValue = 0;
 int totalDataLost;
 int dataLost = 0;
@@ -17,7 +17,8 @@ int seed = 30001;
 unsigned int arraysShuffled = 0;
 unsigned int channelID = 0;
 unsigned int channel = 0;
-int firstInt = 20009;
+
+uint8_t firstInt = 133;
 
 
 
@@ -84,11 +85,11 @@ void loop() {
       */
       
       lastValue = channelID;
-      if (data[1] != arraysShuffled && micros()-t > 10000){
-        if (data[1] == 10000){
+      if ((data[2] << 8) + data[1] != arraysShuffled && micros()-t > 10000){
+        if ((data[2] << 8) + data[1] == 10000){
           Serial.println(micros()-t);
         }
-        arraysShuffled = data[1];
+        arraysShuffled = (data[2] << 8) + data[1];
         shuffle_array(channelAr, channelCap, seed - arraysShuffled, channelArTemplate);
       }
       t = micros();
